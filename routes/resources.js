@@ -4,15 +4,7 @@ var secrets = require('../secrets')
 var querystring = require('querystring');
 var youtubeDL = require('youtube-dl');
 var router = express.Router();
-
-
-var searchByKeyword = function() {
-  var results = YouTube.Search.list('id,snippet', {q: 'dogs', maxResults: 25});
-  for(var i in results.items) {
-    var item = results.items[i];
-    Logger.log('[%s] Title: %s', item.id.videoId, item.snippet.title);
-  }
-}
+var fs = require('fs');
 
 var base_url = "https://www.googleapis.com/youtube/v3/search?";
 var query = {
@@ -32,6 +24,7 @@ router.get('/', function(req, res, next) {
 router.get('/:searchstring', function(req, res, next) {
   query.q = req.params.searchstring;
   var qstring = base_url + querystring.stringify(query);
+  console.log(qstring);
   request(qstring, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       res.send(body);
@@ -40,21 +33,17 @@ router.get('/:searchstring', function(req, res, next) {
       res.send(error);
     }
   });
-
-  // res.send('resource with arg: ' + req.params.searchstring);
 });
 
 router.get('/video/:videoId', function(req, res, next) {
-  var video = youtubeDL(req.params.videoId,
-    ['-f', 'bestaudio']);
+  console.log('requested ' + req.params.videoId);
+  var filename = req.params.videoId + ".mp3";
+  youtubeDL.exec(req.params.videoId, ['-x', '--audio-format', 'mp3', '-o', filename], {}, function(err, output) {
+    if (err) throw err;
+       res.setHeader("content-type", "audio/mp3");
 
-  video.on('info', function(info) {
-    console.log('Download started');
-    console.log('filename: ' + info.filename);
-    console.log('size: ' + info.size);
-    // res.header('Content-Disposition', 'attachment; filename="new file name.pdf"');
-    res.setHeader("content-type", "audio/mp4");
-    video.pipe(res);
+    fs.createReadStream(filename).pipe(res);
+    fs.unlink(filename);
   });
 });
 
