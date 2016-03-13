@@ -39,11 +39,13 @@ router.get('/video/:videoId', function(req, res, next) {
   console.log('requested ' + req.params.videoId);
   var filename = req.params.videoId + ".mp3";
   youtubeDL.exec(req.params.videoId, ['-x', '--audio-format', 'mp3', '-o', filename], {}, function(err, output) {
-    if (err) throw err;
-       res.setHeader("content-type", "audio/mp3");
-
-    fs.createReadStream(filename).pipe(res);
-    fs.unlink(filename);
+    if (err){
+      res.send("bad request");
+    }else{
+      res.setHeader("content-type", "audio/mp3");
+      fs.createReadStream(filename).pipe(res);
+      fs.unlink(filename);
+    }
   });
 });
 
