@@ -38,15 +38,29 @@ router.get('/:searchstring', function(req, res, next) {
 router.get('/video/:videoId', function(req, res, next) {
   console.log('requested ' + req.params.videoId);
   var filename = req.params.videoId + ".mp3";
+  var title = "placeholder";
+  youtubeDL.getInfo(req.params.videoId, [], function(err, info) {
+    if (err) {
+      res.send("bad request");
+      return;
+    }
+    title = info.title;
+  });
+
   youtubeDL.exec(req.params.videoId, ['-x', '--audio-format', 'mp3', '-o', filename], {}, function(err, output) {
     if (err){
       res.send("bad request");
+      return;
     }else{
+      console.log("success!")
       res.setHeader("content-type", "audio/mp3");
+      console.log(title);
+      res.setHeader("song-title", title);
       fs.createReadStream(filename).pipe(res);
       fs.unlink(filename);
     }
   });
+
 });
 
 module.exports = router;
