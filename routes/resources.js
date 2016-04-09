@@ -40,9 +40,11 @@ router.get('/video/:videoId', function(req, res, next) {
 
   youtubeDL.exec(req.params.videoId, ['--add-metadata', '-x', '--audio-format', 'mp3'], {}, function(err, output) {
     if (err){
+      console.log(err);
       res.send("bad request");
       return;
     }else{
+      console.log(output);
       var outputString = output.toString();
       var filenamei = outputString.search("Destination: .*.mp3");
       var endi = outputString.search("mp3");
