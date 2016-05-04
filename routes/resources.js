@@ -50,6 +50,7 @@ router.get('/video/:videoId', function(req, res, next) {
       var endi = outputString.search("mp3");
       var filename = outputString.substring(filenamei + 13, endi + 3);
       res.setHeader("content-type", "audio/mp3");
+      res.setHeader("song-title", filename);
       fs.createReadStream(filename).pipe(res).on('close', function() {
         fs.unlink(filename);
       }).pipe(res);
