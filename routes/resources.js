@@ -35,10 +35,15 @@ router.get('/:searchstring', function(req, res, next) {
   });
 });
 
-router.get('/video/:videoId', function(req, res, next) {
-  console.log('requested ' + req.params.videoId);
+router.post('/video', function(req, res, next) {
 
-  youtubeDL.exec(req.params.videoId, ['--add-metadata', '-x', '--audio-format', 'mp3'], {}, function(err, output) {
+  if(!req.body.url){
+    res.send("no param 'url' provided");
+    return;
+  }
+  console.log('requested ' + req.body.url);
+
+  youtubeDL.exec(req.body.url, ['--add-metadata', '-x', '--audio-format', 'mp3'], {}, function(err, output) {
     if (err){
       console.log(err);
       res.send("bad request");
